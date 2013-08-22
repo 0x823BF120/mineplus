@@ -2,21 +2,29 @@ package mineplus;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 
 @Mod(modid = MinePlus.modid, name = "MinePlus", version = "1.0")
 @NetworkMod(clientSideRequired = true, serverSideRequired = false)
 public class MinePlus {
+	@Instance("MinePlus")
+	public static MinePlus instance;
 	public static final String modid = "Heartless_MinePlus";
-
+	private GuiHandlerGrinder guiHandlerGrinder = new GuiHandlerGrinder();
+	
 	public static Block copperOre;
 	public static Block tinOre;
 	public static Block Limestone;
@@ -27,6 +35,9 @@ public class MinePlus {
 	public static Block rubyOre;
 	public static Block sapphireOre;
 	public static Block emeraldOre;
+
+	public static Block grinder;
+	public static Block grinderActive;
 	
 	public static Item copperIngot;
 	public static Item tinIngot;
@@ -38,18 +49,25 @@ public class MinePlus {
 	public static Item ironDust;
 	public static Item goldDust;
 	public static Item diamondDust;
-	
+
 	public int global_block_id = 500;
 	public int global_item_id = 5000;
 
+	@SidedProxy(clientSide = "mineplus.ClientProxy", serverSide = "mineplus.CommonProxy")
+	public static ServerProxy proxy;
+
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
-		copperOre = new MinePlusBlock(global_block_id+1, Material.rock).setUnlocalizedName("copperOre");
-		tinOre = new MinePlusBlock(global_block_id+2, Material.rock).setUnlocalizedName("tinOre");
-		bronzeOre = new MinePlusBlock(global_block_id+4, Material.rock).setUnlocalizedName("bronzeOre");
-		rubyOre = new MinePlusBlock(global_block_id+5, Material.rock).setUnlocalizedName("rubyOre");
-		sapphireOre = new MinePlusBlock(global_block_id+6, Material.rock).setUnlocalizedName("sapphireOre");
-		emeraldOre = new MinePlusBlock(global_block_id+7, Material.rock).setUnlocalizedName("emeraldOre");
+		
+		copperOre = new MinePlusBlock(global_block_id + 1, Material.rock).setUnlocalizedName("copperOre");
+		tinOre = new MinePlusBlock(global_block_id + 2, Material.rock).setUnlocalizedName("tinOre");
+		bronzeOre = new MinePlusBlock(global_block_id + 4, Material.rock).setUnlocalizedName("bronzeOre");
+		rubyOre = new MinePlusBlock(global_block_id + 5, Material.rock).setUnlocalizedName("rubyOre");
+		sapphireOre = new MinePlusBlock(global_block_id + 6, Material.rock).setUnlocalizedName("sapphireOre");
+		emeraldOre = new MinePlusBlock(global_block_id + 7, Material.rock).setUnlocalizedName("emeraldOre");
+
+		grinder = new MinePlusGrinderBlock(global_block_id + 8, false);
+		grinderActive = new MinePlusGrinderBlock (global_block_id+9, false);
 		
 		copperIngot = new MinePlusItem(global_item_id+1).setUnlocalizedName("copperIngot");
 		tinIngot = new MinePlusItem(global_item_id+2).setUnlocalizedName("tinIngot");
@@ -79,6 +97,13 @@ public class MinePlus {
 		GameRegistry.registerItem(ironDust, modid + ironDust.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(goldDust, modid + goldDust.getUnlocalizedName().substring(5));
 		GameRegistry.registerItem(diamondDust, modid + diamondDust.getUnlocalizedName().substring(5));
+
+		GameRegistry.registerBlock(grinder, modid + grinder.getUnlocalizedName().substring(5));
+		
+		GameRegistry.registerTileEntity(TileEntityGrinder.class,"tileEntityGrinder");
+		
+		//RenderingRegistry.registerBlockHandler(2105, Render.INSTANCE);
+		NetworkRegistry.instance().registerGuiHandler(this, guiHandlerGrinder);		
 		
 		//GameRegistry.addShapelessRecipe(new ItemStack(copperIngot), new Object[] { new ItemStack(Item.diamond), new ItemStack(Block.stone), new ItemStack(Item.dyePowder, 1, 15) });
 		
@@ -101,5 +126,7 @@ public class MinePlus {
 		LanguageRegistry.addName(ironDust, "Iron Dust");
 		LanguageRegistry.addName(goldDust, "Gold Dust");
 		LanguageRegistry.addName(diamondDust, "Diamond Dust");
+		
+		proxy.registerRenderThings();
 	}
 }
